@@ -4,4 +4,4 @@
 # distribution of this software for license terms.
 
 chomp: chomp.hs
-	ghci -Wall --make -o chomp chomp.hs
+	ghc -Wall --make -o chomp chomp.hs
