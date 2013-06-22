@@ -33,10 +33,16 @@ instance Show Board where
              i <- [0 .. rows - 1] ]
 
 instance Show Move where
-  show move = show (coords move)
+  show move = 
+    show (adjust $ coords move)
+    where
+      adjust (r, c) = (r + 1, c + 1)
 
 getMove :: IO Move
-getMove = fmap (Move . read) getLine
+getMove = 
+  fmap (Move . adjust . read) getLine
+  where
+    adjust (r, c) = (r - 1, c - 1)
 
 makeMove :: Board -> Move -> Board
 makeMove b (Move (r0, c0)) =
