@@ -83,15 +83,15 @@ computerTurn b = do
         _ <- printf "%s :-P\n" $ show m
         return $ makeMove b m
 
-playGame :: Board -> Action -> Action -> IO ()
-playGame b a1 a2 = do
+playGame :: Board -> (Action, String) -> (Action, String) -> IO ()
+playGame b p1@(a1, s1) p2 = do
   case (squares b) ! (0, 0) of
     True -> do
       putStr $ show b
       b' <- a1 b
       putStrLn ""
-      playGame b' a2 a1
-    False -> putStrLn "Game over"
+      playGame b' p2 p1
+    False -> putStrLn s1
 
 main :: IO ()
-main = playGame newBoard humanTurn computerTurn
+main = playGame newBoard (humanTurn, "I lose.") (computerTurn, "You lose.")
