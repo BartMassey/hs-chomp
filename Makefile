@@ -4,4 +4,13 @@
 # distribution of this software for license terms.
 
 chomp: chomp.hs
-	ghc -Wall --make -o chomp chomp.hs
+	runghc Setup.hs configure --user
+	runghc Setup.hs build
+	cp dist/build/chomp/chomp chomp
+
+install: chomp
+	rm -f chomp
+	runghc Setup.hs install
+
+clean:
+	rm -rf dist
