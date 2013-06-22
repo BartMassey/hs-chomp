@@ -6,7 +6,7 @@
 -- Chomp player in Haskell
 
 import Data.Array
-import Data.List (foldl')
+import Data.List (foldl1')
 import Text.Printf
 
 data Move = Move { coords :: (Int, Int) }
@@ -47,21 +47,21 @@ makeMove b (Move (r0, c0)) =
 
 negamax :: Board -> Either Move Move
 negamax b =
-  case map fst $ filter snd $ assocs $ squares b of
-    [(0, 0)] -> 
-      Left $ Move (0, 0)
-    (0, 0) : moves ->
-      foldl' firstRight (Left $ error "bogus move") moves
-    _ -> 
-      error "bad move list in negamax"
+  tryMoves $ map fst $ filter snd $ assocs $ squares b
   where
-    firstRight (Right m) _ = Right m
-    firstRight _ sq =
-      decide $ negamax $ makeMove b cmove
+    tryMoves [] = 
+      Right undefined
+    tryMoves ms = 
+      foldl1' firstRight $ map (Left . Move) ms
       where
-        cmove = Move sq
-        decide (Left _) = Right cmove
-        decide (Right _) = Left cmove
+        firstRight (Right m) _ = 
+          Right m
+        firstRight _ (Left cmove) =
+          case negamax $ makeMove b cmove of
+            Left _ -> Right cmove
+            Right _ -> Left cmove
+        firstRight _ (Right _) = 
+          error "internal error: Right cmove"
 
 type Action = Board -> IO Board
 
