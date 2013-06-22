@@ -24,13 +24,14 @@ newBoard = Board $
            repeat True
 
 instance Show Board where
-  show b = unlines $ 
-           [ concat $
-             [ if squares b ! (i, j) 
-               then if (i, j) == (0, 0) then "*" else "o" 
-               else "." |
-               j <- [0 .. cols - 1] ] |
-             i <- [0 .. rows - 1] ]
+  show b = 
+    unlines $ [ concat $ [ boardChar b (i, j) | j <- [0 .. cols - 1] ] |
+                i <- [0 .. rows - 1] ]
+    where
+      boardChar b c
+        | not (squares b ! c) = "."
+        | c == (0, 0) = "*"
+        | otherwise = "o"
 
 instance Show Move where
   show move = 
