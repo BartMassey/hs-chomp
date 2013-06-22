@@ -6,6 +6,7 @@
 -- Chomp player in Haskell
 
 import Data.Array
+import Data.List (foldl')
 import Text.Printf
 
 data Move = Move { coords :: (Int, Int) }
@@ -42,23 +43,23 @@ makeMove b (Move (r0, c0)) =
                  r <- [r0 .. rows - 1],
                  c <- [c0 .. cols - 1] ]
 
-negamax :: Board -> Either (Maybe Move) Move
+negamax :: Board -> Either Move Move
 negamax b =
-  let (0, 0) : sqs = map fst $ filter snd $ assocs $ squares b in
-  case findJust $ map tryNegamax sqs of
-     Just m -> Right m 
-     Nothing -> 
-       case sqs of
-         [] -> Left Nothing
-         _ -> Left $ Just $ Move $ last sqs
+  case map fst $ filter snd $ assocs $ squares b of
+    [(0, 0)] -> 
+      Left $ Move (0, 0)
+    (0, 0) : moves ->
+      foldl' firstRight (Left $ error "bogus move") moves
+    _ -> 
+      error "bad move list in negamax"
   where
-    findJust (Just x : _) = Just x
-    findJust (_ : xs) = findJust xs
-    findJust [] = Nothing
-    tryNegamax sq =
-      case negamax $ makeMove b $ Move sq of
-        Right m -> Just m
-        Left _ -> Nothing
+    firstRight (Right m) _ = Right m
+    firstRight _ sq =
+      decide $ negamax $ makeMove b cmove
+      where
+        cmove = Move sq
+        decide (Left _) = Right cmove
+        decide (Right _) = Left cmove
 
 type Action = Board -> IO Board
 
@@ -72,18 +73,20 @@ computerTurn b = do
     Right m -> do
       _ <- printf "%s :-)\n" $ show m
       return $ makeMove b m
-    Left (Just m) -> do
-      _ <- printf "%s :-P\n" $ show m
-      return $ makeMove b m
-    Left Nothing ->
-      error "internal error: computer move on empty board"
+    Left m 
+      | coords m == (0, 0) -> do
+        _ <- printf "%s :-(\n" $ show m
+        return $ makeMove b m
+      | otherwise -> do
+        _ <- printf "%s :-P\n" $ show m
+        return $ makeMove b m
 
 playGame :: Board -> Action -> Action -> IO ()
 playGame b a1 a2 = do
-  putStr $ show b
-  b' <- a1 b
   case (squares b) ! (0, 0) of
     True -> do
+      putStr $ show b
+      b' <- a1 b
       putStrLn ""
       playGame b' a2 a1
     False -> putStrLn "Game over"
