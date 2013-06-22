@@ -20,13 +20,15 @@ cols = 4
 
 newBoard :: Board
 newBoard = Board $ 
-             listArray ((0, 0), (rows - 1, cols - 1)) $ 
-             repeat True
+           listArray ((0, 0), (rows - 1, cols - 1)) $ 
+           repeat True
 
 instance Show Board where
   show b = unlines $ 
            [ concat $
-             [ if squares b ! (i, j) then "o" else "." |
+             [ if squares b ! (i, j) 
+               then if (i, j) == (0, 0) then "*" else "o" 
+               else "." |
                j <- [0 .. cols - 1] ] |
              i <- [0 .. rows - 1] ]
 
