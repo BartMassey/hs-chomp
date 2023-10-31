@@ -13,4 +13,4 @@ install: chomp
 	runghc Setup.hs install
 
 clean:
-	rm -rf dist
+	rm -rf dist chomp
